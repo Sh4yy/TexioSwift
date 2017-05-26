@@ -1,45 +1,45 @@
 import Foundation
 
-typealias cellNumber = String
+typealias receiverId = String
 
-class Textio {
+class Texio {
     
     /// initialize for multiple receivers
     /// - parameter receiver : receivers cell number
     /// - parameter text : message text
-    func new(receiver : [cellNumber], text : String) -> TextioText {
-        return TextioText(receiver: receiver, text: text)
+    func new(receiver : [receiverId], text : String) -> TexioText {
+        return TexioText(receiver: receiver, text: text)
     }
     
     /// initialize for one receiver only
     /// - parameter receiver : receiver's cell number
     /// - parameter text : message text
-    func new(receiver : cellNumber, text : String) -> TextioText {
-        return TextioText(receiver: receiver, text: text)
+    func new(receiver : receiverId, text : String) -> TexioText {
+        return TexioText(receiver: receiver, text: text)
     }
     
-    func builder(text : (TextioText) -> Void) {
-        let builder = TextioText(receiver: [], text: "")
+    func builder(text : (TexioText) -> Void) {
+        let builder = TexioText(receiver: [], text: "")
         text(builder)
     }
     
-    private func send(_ message : TextioText) {
+    private func send(_ message : TexioText) {
         
     }
     
 }
 
 
-class TextioText {
+class TexioText {
     
-    private var receivers : [cellNumber]
+    var receivers : [receiverId]
     var text : String
     
-    func addCells(_ cell : [cellNumber]) {
+    func addCells(_ cell : [receiverId]) {
         receivers.append(contentsOf: cell)
     }
     
-    func addCell(_ cell : cellNumber) {
+    func addCell(_ cell : receiverId) {
         self.addCells([cell])
     }
     
@@ -47,17 +47,66 @@ class TextioText {
         self.receivers.removeAll()
     }
     
-    init(receiver : [cellNumber], text : String) {
+    init(receiver : [receiverId], text : String) {
         self.receivers = receiver; self.text = text
     }
     
     /// initialize for one receiver only
     /// - parameter receiver : receiver's cell number
     /// - parameter text : message text
-    convenience init(receiver : cellNumber, text : String) {
+    convenience init(receiver : receiverId, text : String) {
         self.init(receiver: [receiver], text: text)
     }
     
-    func send() {}
+    enum clients {
+        case telegram
+        case neximo
+    }
+    
+    func send(_ to : clients) {
+        switch to {
+        case .neximo: TexioClients.telegramCleint(self)
+        case .telegram: TexioClients.telegramCleint(self)
+        }
+    }
     
 }
+
+
+class TexioClients {
+}
+
+extension TexioClients {
+    
+    static var telegramCredentials = ["token" : "243820160:AAFhhft325hcQQ4HtdjuYPWG8lLmx_ZWQEM"]
+    
+    static func telegramCleint(_ message : TexioText) {
+        
+        let route = "https://api.telegram.org/bot\(telegramCredentials["token"]!)/sendMessage"
+        
+        for chat_id in message.receivers {
+            
+            let params = ["chat_id" : chat_id,
+                          "text" : message.text]
+            
+            TexioHTTP.makeRequest(route, params, .GET)
+        }
+        
+    }
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
