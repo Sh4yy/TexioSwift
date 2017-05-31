@@ -13,7 +13,7 @@ class TexioHTTP {
     typealias JSON = [String : Any]
     
     /// this will be the endpoint of every request
-    static func makeRequest(_ route : String, _ json : JSON, _ method : httpMethods = .POST, completion : ((Data?, URLResponse?, Error?) -> Void)? = nil) {
+    static func makeRequest(_ route : String, _ json : JSON, header : [String : String] = [:], _ method : httpMethods = .POST, completion : ((Data?, URLResponse?, Error?) -> Void)? = nil) {
         guard let url = URL(string: route) else { return }
         var request = URLRequest(url: url)
         
@@ -26,6 +26,10 @@ class TexioHTTP {
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
+        
+        for (key, value) in header {
+            request.addValue(value, forHTTPHeaderField: key)
+        }
         
         let session = URLSession.shared.dataTask(with: request) { (data, urlResponse, error) in
             if completion != nil {

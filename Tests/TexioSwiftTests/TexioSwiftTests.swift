@@ -33,6 +33,38 @@ class TexioSwiftTests: XCTestCase {
         
     }
 
+    
+    func testMakeNotification() {
+        
+        let notification = TexioNotification.FileteredNotification()
+        notification.app_version(relation: .greater, value: "1.0.0")
+        notification.operation(.or)
+        notification.first_session(relation: .greater, hoursAgo: 5)
+        
+        notification.delayed_option(.sendAfter)
+        notification.send_after(Date().description)
+        
+        notification.addContent(.Persian, text: "hey this is a persian notification")
+        notification.addContent(.English, text: "hey this is an english notification")
+        notification.addHeading(.Persian, text: "persian heading")
+        notification.addHeading(.English, text: "english heading")
+        notification.addSubtitle(.Persian, text: "persian subtitle")
+        notification.addSubtitle(.English, text: "english subtitle")
+        
+        notification.mutable_content = true
+        notification.tag(relation: .equal, key: "premium", value: "true")
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: notification.parameters, options: .prettyPrinted)
+            let jsonString = String(data: jsonData, encoding: .utf8)
+            print(jsonString!)
+        } catch(let error) {
+            print("\(error)")
+        }
+        
+        
+    }
+
     static var allTests = [
         ("testExample", testExample),
     ]

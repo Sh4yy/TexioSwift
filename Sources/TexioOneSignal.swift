@@ -4,34 +4,63 @@
 //
 //  Created by Shayan on 5/30/17.
 //
+//  This is a swift wrapper for OneSignal's notification API
+//  for when you want your server to programmatically send
+//  notifications to your users. You may use one of these three
+//  methods to create notifications using this wrapper: Segment,
+//  Filter, or by Device ID
+//
+//  You can learn more about this api and OneSignal's notification
+//  API from their documentations :
+//  https://documentation.onesignal.com/reference
 //
 
 import Foundation
 
 class TexioNotification {
     
+    private let httpUrl = "https://onesignal.com/api/v1/notifications"
+    
     typealias USD = Double
     
     /// list of the parameters for each request
-    var parameters : [[String : Any]] = []
+    var parameters : [String : Any] = [:]
+    
+    fileprivate var filters : [[String : Any]] = [] {
+        didSet { parameters["filters"] = filters }
+    }
     
     typealias languageCode = String
     
-    private var headings :  [[languageCode : String]] = []
-    private var subtitle :  [[languageCode : String]] = []
-    private var content  :  [[languageCode : String]] = []
+    private var headings : [languageCode : String] = [:] {
+        didSet { parameters["headings"] = headings }
+    }
 
+    private var subtitle : [languageCode : String] = [:] {
+        didSet { parameters["subtitle"] = subtitle }
+    }
+    
+    private var content : [languageCode : String] = [:] {
+        didSet { parameters["contents"] = content }
+    }
+        
     /// Sending true wakes your app from background to run custom native code (Apple interprets this as content-available=1)
     /// * platform : ios
-    var content_available : Bool = true
+    var content_available : Bool = true {
+        didSet { parameters["content_available"] = content_available }
+    }
     
     /// Use a template you setup on our dashboard. You can override the template values by sending other parameters with the request. The template_id is the UUID found in the URL when viewing a template on our dashboard.
     /// * platform : all
-    var template_id : String?
+    var template_id : String? {
+        didSet { parameters["template_id"] = template_id }
+    }
     
     /// Sending true allows you to change the notification content in your app before it is displayed. Triggers didReceive(_:withContentHandler:) on your
     /// * platfrom : ios 10+
-    var mutable_content : Bool = false
+    var mutable_content : Bool = false {
+        didSet { parameters["mutable_content"] = mutable_content }
+    }
     
     
     /// The notification's title, a map of language codes to text for each language. Each hash must have a language code string for a key, mapped to the localized text you would like users to receive for that language. A default title may be displayed if a title is not provided.
@@ -40,7 +69,7 @@ class TexioNotification {
     /// - parameter lc : Language code for this heading
     /// - parameter text : the text of this heading
     func addHeading(_ lc : LanguageCode, text : String) {
-        self.headings.append([lc.rawValue : text])
+        self.headings[lc.rawValue] = text
     }
     
     /// The notification's subtitle, a map of language codes to text for each language. Each hash must have a language code string for a key, mapped to the localized text you would like users to receive for that language. A default title may be displayed if a title is not provided.
@@ -49,7 +78,7 @@ class TexioNotification {
     /// - parameter lc : Language code for this subtitle
     /// - parameter text : the text of this subtitle
     func addSubtitle(_ lc : LanguageCode, text : String) {
-        self.subtitle.append([lc.rawValue : text])
+        self.subtitle[lc.rawValue] = text
     }
     
     /// The notification's content (excluding the title), a map of language codes to text for each language.
@@ -58,7 +87,7 @@ class TexioNotification {
     /// - parameter lc : Language code for this content
     /// - parameter text : the text of this content
     func addContent(_ lc : LanguageCode, text : String) {
-        self.content.append([lc.rawValue : text])
+        self.content[lc.rawValue] = text
     }
     
     /// Schedule notification for future delivery.
@@ -69,7 +98,7 @@ class TexioNotification {
     /// - "Sept 24 2015 14:00:00 GMT-0700"
     /// -  "Thu Sep 24 2015 14:00:00 GMT-0700 (Pacific Daylight Time)"
     func send_after(_ date : String) {
-        
+        parameters["send_after"] = date
     }
     
     enum delayed_options : String {
@@ -89,13 +118,13 @@ class TexioNotification {
     /// - last-active Same as Intelligent Delivery. (Deliver at the same time of day as each user last used your app).
     /// - If send_after is used, this takes effect after the send_after time has elapsed.
     func delayed_option(_ value : delayed_options) {
-        
+        parameters["delayed_option"] = value.rawValue
     }
     
     /// Use with delayed_option=timezone
     /// parameter - time : Example: "9:00AM"
     func delivery_time_of_day(_ time : String) {
-        
+        parameters["delivery_time_of_day"] = time
     }
     
     /// start a new segment notification
@@ -107,7 +136,7 @@ class TexioNotification {
     /// start a new filtered notification
     /// - return a new instance of TexioFiltersNotifications
     static func FileteredNotification() -> TexioFiltersNotifications {
-        return FileteredNotification()
+        return TexioFiltersNotifications()
     }
     
     /// start a new specific notification
@@ -116,7 +145,67 @@ class TexioNotification {
         return TexioSpecificNotification()
     }
     
-    func send() {}
+    func send() {
+        
+        
+        let api_key = "api key goes here"
+        
+        let httpHeader = ["Content-Type" : "application/json",
+                          "charset" : "utf-8",
+                          "Authorization" : "Basic \(api_key)"]
+        
+        let app_id = "app id goes here"
+        
+        parameters["app_id"] = app_id
+        
+        TexioHTTP.makeRequest(httpUrl, parameters, header: httpHeader, .POST)
+        
+    }
+    
+    /// The following are languages supported by OneSignal
+    enum LanguageCode : String {
+        case English            = "en"
+        case Arabic             = "ar"
+        case Catalan            = "ca"
+        case ChineseSimplified  = "zh-Hans"
+        case ChineseTraditional = "zh-Hant"
+        case Croatian           = "hr"
+        case Czech              = "cs"
+        case Danish             = "da"
+        case Dutch              = "nl"
+        case Estonian           = "et"
+        case Finnish            = "fi"
+        case French             = "fr"
+        case Georgian           = "ka"
+        case Bulgarian          = "bg"
+        case German             = "de"
+        case Greek              = "el"
+        case Hindi              = "hi"
+        case Hebrew             = "he"
+        case Hungarian          = "hu"
+        case Indonesian         = "id"
+        case Italian            = "it"
+        case Japanese           = "ja"
+        case Korean             = "ko"
+        case Latvian            = "lv"
+        case Lithuanian         = "lt"
+        case Malay              = "ms"
+        case Norwegian          = "nb"
+        case Persian            = "fa"
+        case Polish             = "pl"
+        case Portuguese         = "pt"
+        case Romanian           = "ro"
+        case Russian            = "ru"
+        case Serbian            = "sr"
+        case Slovak             = "sk"
+        case Spanish            = "es"
+        case Swedish            = "sv"
+        case Thai               = "th"
+        case Turkish            = "tr"
+        case Ukrainian          = "uk"
+        case Vietnamese         = "vi"
+        
+    }
     
 }
 
@@ -146,13 +235,13 @@ class TexioSegmentNotification : TexioNotification {
     /// The segment names you want to target. Users in these segments will receive a notification. This targeting parameter is only compatible with excluded_segments
     /// - parameter included_users : the iuncluded segments
     func include(_ included_users : [String]) {
-        self.parameters.append(["included_segments" : included_users])
+        self.parameters["included_segments"] = included_users
     }
     
     /// Segment that will be excluded when sending. Users in these segments will not receive a notification, even if they were included in included_segments. This targeting parameter is only compatible with included_segments.
     /// - parameter excluded_users : the excluded segments
     func exclude(_ excluded_users : [String]) {
-        self.parameters.append(["excluded_segments" : excluded_users])
+        self.parameters["excluded_segments"] = excluded_users
     }
     
 }
@@ -185,7 +274,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// - parameter relation : ">" or "<"
     /// - parameter hoursAgo : number of hours before or after the users last session. Example: "1.1"
     func last_session(relation : Relations, hoursAgo : Double) {
-        self.parameters.append([
+        self.filters.append([
             "last_session" : [
                 "relation"  : relation.sign,
                 "hours_ago" : hoursAgo
@@ -197,7 +286,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// - parameter relation : ">" or "<"
     /// - parameter hoursAgo : number of hours before or after the users first session. Example: "1.1"
     func first_session(relation : Relations, hoursAgo : Double) {
-        self.parameters.append([
+        self.filters.append([
             "first_session" : [
                 "relation"  : relation.sign,
                 "hours_ago" : hoursAgo
@@ -209,7 +298,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// - parameter relation : ">", "<", "=" or "!="
     /// - parameter hoursAgo : number sessions. Example: "1"
     func session_count(relation : Relations, value : Int){
-        self.parameters.append([
+        self.filters.append([
             "session_count" : [
                 "relation" : relation.sign,
                  "value" : value
@@ -221,7 +310,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// - parameter relation : ">" or "<"
     /// - parameter value : Time in seconds the user has been in your app. Example: "3600"
     func session_time(relation : Relations, value : Int) {
-        self.parameters.append([
+        self.filters.append([
             "session_time" : [
                 "relation" : relation.sign,
                 "value" : value
@@ -233,7 +322,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// - parameter relation : ">", "<", or "="
     /// - parameter value : Amount in USD a user has spent on IAP (In App Purchases). Example: "0.99"
     func amount_spent(relation : Relations, value : USD){
-        self.parameters.append([
+        self.filters.append([
             "amount_spent" : [
                 "relation" : relation.sign,
                 "value" : value
@@ -246,7 +335,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// - parameter key : SKU purchased in your app as an IAP (In App Purchases). Example: "com.domain.100coinpack"
     /// - parameter value : value of SKU to compare to. Example: "0.99"
     func bought_sku(relation : Relations, key : String, value : String){
-        self.parameters.append([
+        self.filters.append([
             "bought_sku" : [
                 "relation" : relation.sign,
                 "key" : key,
@@ -260,7 +349,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// - parameter key : Tag key to compare.
     /// - parameter value : Tag value to compare. Not required for "exists" or "not_exists"
     func tag(relation : Relations, key : String, value : String){
-        self.parameters.append([
+        self.filters.append([
             "tag" : [
                 "relation" : relation.sign,
                 "key" : key,
@@ -273,7 +362,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// - parameter relation : "=" or "!="
     /// - parameter value : 2 character language code. Example: "en"
     func language(relation : Relations, value : LanguageCode) {
-        self.parameters.append([
+        self.filters.append([
             "language" : [
                 "relation" : relation.sign,
                 "value" : value.rawValue
@@ -285,7 +374,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// - parameter relation : ">", "<", "=" or "!="
     /// - parameter value : app version. Example: "1.0.0"
     func app_version(relation : Relations, value : String){
-        self.parameters.append([
+        self.filters.append([
             "app_version" : [
                 "relation" : relation.sign,
                 "value" : value
@@ -298,7 +387,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// - parameter lat : latitude
     /// - parameter lon : longitude
     func location(radius : Double, lat : Double, lon : Double){
-        self.parameters.append([
+        self.filters.append([
             "location" : [
                 "radius" : radius,
                 "lat" : lat,
@@ -310,7 +399,7 @@ class TexioFiltersNotifications : TexioNotification {
     /// Filter users based on their email
     /// - parameter email : email address
     func email(email : String) {
-        self.parameters.append([
+        self.filters.append([
             "email" : [
                "email" : email
                ]
@@ -327,7 +416,7 @@ class TexioFiltersNotifications : TexioNotification {
     
     /// Filter entries use AND by default; insert {"operator": "OR"} between entries to OR the parameters together.
     func operation(_ operaton : Operations) {
-        self.parameters.append([
+        self.filters.append([
             "operator" : operaton.string
             ])
     }
@@ -342,7 +431,7 @@ class TexioSpecificNotification : TexioNotification {
     override func send() {
         
         if users == nil { users = [] }
-        self.parameters.append([
+        self.filters.append([
             "include_player_ids" : users!
             ])
         super.send()
@@ -350,50 +439,6 @@ class TexioSpecificNotification : TexioNotification {
     
 }
 
-/// The following are languages supported by OneSignal
-enum LanguageCode : String {
-    case English            = "en"
-    case Arabic             = "ar"
-    case Catalan            = "ca"
-    case ChineseSimplified  = "zh-Hans"
-    case ChineseTraditional = "zh-Hant"
-    case Croatian           = "hr"
-    case Czech              = "cs"
-    case Danish             = "da"
-    case Dutch              = "nl"
-    case Estonian           = "et"
-    case Finnish            = "fi"
-    case French             = "fr"
-    case Georgian           = "ka"
-    case Bulgarian          = "bg"
-    case German             = "de"
-    case Greek              = "el"
-    case Hindi              = "hi"
-    case Hebrew             = "he"
-    case Hungarian          = "hu"
-    case Indonesian         = "id"
-    case Italian            = "it"
-    case Japanese           = "ja"
-    case Korean             = "ko"
-    case Latvian            = "lv"
-    case Lithuanian         = "lt"
-    case Malay              = "ms"
-    case Norwegian          = "nb"
-    case Persian            = "fa"
-    case Polish             = "pl"
-    case Portuguese         = "pt"
-    case Romanian           = "ro"
-    case Russian            = "ru"
-    case Serbian            = "sr"
-    case Slovak             = "sk"
-    case Spanish            = "es"
-    case Swedish            = "sv"
-    case Thai               = "th"
-    case Turkish            = "tr"
-    case Ukrainian          = "uk"
-    case Vietnamese         = "vi"
-    
-}
 
 
 

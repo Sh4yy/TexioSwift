@@ -11,7 +11,7 @@ import Foundation
 
 extension TexioClients {
     
-    static var telegramCredentials = ["token" : "243820160:AAFhhft325hcQQ4HtdjuYPWG8lLmx_ZWQEM"]
+    static var telegramCredentials = ["token" : "Telegram Bot Token Here"]
     
     static func telegramCleint(_ message : TexioText) {
         
