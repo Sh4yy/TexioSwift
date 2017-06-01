@@ -60,12 +60,12 @@ class TexioText {
     
     enum clients {
         case telegram
-        case neximo
+        case nexmo
     }
     
     func send(_ to : clients) {
         switch to {
-        case .neximo: TexioClients.telegramCleint(self)
+        case .nexmo: TexioClients.nexmoClient(self)
         case .telegram: TexioClients.telegramCleint(self)
         }
     }

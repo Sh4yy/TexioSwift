@@ -11,13 +11,11 @@ import Foundation
 
 extension TexioClients {
     
-    fileprivate enum TelegramAPI : String {
-        case TOKEN = ""
-    }
+    static var TelegramToken : (String) = ""
     
     static func telegramCleint(_ message : TexioText) {
         
-        let route = "https://api.telegram.org/bot\(TelegramAPI.TOKEN.rawValue)/sendMessage"
+        let route = "https://api.telegram.org/bot\(TelegramToken)/sendMessage"
         
         var parameters = ["text" : message.text]
         

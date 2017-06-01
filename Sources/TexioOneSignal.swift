@@ -20,6 +20,7 @@ import Foundation
 class TexioNotification {
     
     private let httpUrl = "https://onesignal.com/api/v1/notifications"
+    public static var Credentials : (API_KEY : String, APP_ID : String) = ("","")
     
     typealias USD = Double
     
@@ -148,13 +149,13 @@ class TexioNotification {
     func send() {
         
         
-        let api_key = "api key goes here"
+       
         
         let httpHeader = ["Content-Type" : "application/json",
                           "charset" : "utf-8",
-                          "Authorization" : "Basic \(api_key)"]
+                          "Authorization" : "Basic \(TexioNotification.Credentials.API_KEY)"]
         
-        let app_id = "app id goes here"
+        let app_id = TexioNotification.Credentials.APP_ID
         
         parameters["app_id"] = app_id
         
