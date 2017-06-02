@@ -73,6 +73,15 @@ class TexioNotification {
         self.headings[lc.rawValue] = text
     }
     
+    /// The notification's title, a map of language codes to text for each language. Each hash must have a language code string for a key, mapped to the localized text you would like users to receive for that language. A default title may be displayed if a title is not provided.
+    /// * platform : all
+    /// * example : {"en": "English Title", "es": "Spanish Title"}
+    /// - parameter lc : Language code for this heading
+    /// - parameter text : the text of this heading
+    func addHeading(_ lc : LanguageCode, text : @escaping () -> String) {
+        self.addHeading(lc, text: text())
+    }
+    
     /// The notification's subtitle, a map of language codes to text for each language. Each hash must have a language code string for a key, mapped to the localized text you would like users to receive for that language. A default title may be displayed if a title is not provided.
     /// * platform : ios 10+
     /// * example : {"en": "English Subtitle", "es": "Spanish Subtitle"}
@@ -82,6 +91,15 @@ class TexioNotification {
         self.subtitle[lc.rawValue] = text
     }
     
+    /// The notification's subtitle, a map of language codes to text for each language. Each hash must have a language code string for a key, mapped to the localized text you would like users to receive for that language. A default title may be displayed if a title is not provided.
+    /// * platform : ios 10+
+    /// * example : {"en": "English Subtitle", "es": "Spanish Subtitle"}
+    /// - parameter lc : Language code for this subtitle
+    /// - parameter text : the text of this subtitle
+    func addSubtitle(_ lc : LanguageCode, text : @escaping () -> String) {
+        self.addSubtitle(lc, text: text())
+    }
+    
     /// The notification's content (excluding the title), a map of language codes to text for each language.
     /// * platform : all
     /// * example : {"en": "English Message", "es": "Spanish Message"}
@@ -89,6 +107,15 @@ class TexioNotification {
     /// - parameter text : the text of this content
     func addContent(_ lc : LanguageCode, text : String) {
         self.content[lc.rawValue] = text
+    }
+    
+    /// The notification's content (excluding the title), a map of language codes to text for each language.
+    /// * platform : all
+    /// * example : {"en": "English Message", "es": "Spanish Message"}
+    /// - parameter lc : Language code for this content
+    /// - parameter text : the text of this content
+    func addContent(_ lc : LanguageCode, text : @escaping () -> String) {
+        self.addContent(lc, text: text())
     }
     
     /// Schedule notification for future delivery.

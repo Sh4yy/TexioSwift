@@ -8,7 +8,7 @@ class TexioSwiftTests: XCTestCase {
         
         let message = texio.new(receiver: "234", text: "hey")
         
-        message.send(.neximo)
+        message.send(.nexmo)
         
         texio.builder { text in
             text.addCell("326520335")
@@ -31,6 +31,11 @@ class TexioSwiftTests: XCTestCase {
             print("error")
         }
         
+    }
+    
+    func testHeadings() {
+        let notification = TexioNotification.SegmentNotification()
+        notification.addHeading(.English) { "this is your text message here" }
     }
 
     
